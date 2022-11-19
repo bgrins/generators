@@ -4,7 +4,12 @@ import { DB } from "https://deno.land/x/sqlite/mod.ts";
 import { parse } from "https://deno.land/std/flags/mod.ts";
 // import { parseFromDocument } from "./og-parse.js";
 import { previewResponse } from "./og-preview.jsx";
-import { initialize, generate_fixtures, addRequest } from "./og-db.js";
+import { initialize, generate_fixtures, addRequest, migrate } from "./og-db.js";
+
+// Todo
+// - Store raw unknown meta keys on og_response
+// - Store keys with ":" that don't match in the queue log
+// - Store entire response body / <head> content in dom_response
 
 let corsHeaders = {};
 
@@ -56,6 +61,8 @@ if (!existsSync(file)) {
 if (!db) {
   db = new DB(file, { verbose: true });
 }
+
+migrate({ db });
 
 if (generate_fixture_data) {
   console.log("Seeding data");

@@ -17,6 +17,25 @@ const nanoid = (t = 21) =>
       ""
     );
 
+export function migrate({ db }) {
+  const NEW_VERSION = 2;
+  const CURRENT_VERSION = db.query(`PRAGMA user_version`)[0][0];
+
+  if (CURRENT_VERSION >= NEW_VERSION) {
+    return;
+  }
+
+  console.log(`Migrating from ${CURRENT_VERSION} to ${NEW_VERSION}`);
+
+  if (CURRENT_VERSION < 1) {
+    // Found these on facebook properties and amazon
+    db.query(`ALTER TABLE og_response ADD 'fb:app_id' TEXT`);
+    db.query(`ALTER TABLE og_response ADD 'fb:page_id' TEXT`);
+  }
+
+  db.query(`PRAGMA user_version = ${NEW_VERSION}`);
+}
+
 export async function initialize({ db }) {
   console.log("Creating request table");
   db.transaction(() => {
@@ -227,6 +246,8 @@ export async function initialize({ db }) {
       FOREIGN KEY (request_id) REFERENCES request(id)
     )`);
   });
+
+  migrate({ db });
 }
 
 export function get_response_fields({ db }) {
