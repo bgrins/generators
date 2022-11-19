@@ -9,6 +9,8 @@ deno run --allow-read --allow-write blog-db.js --seed=1 --locale=fr --file=local
 
 Opengraph example
 ```
-deno run -A og-db.js
-datasette -p 8080 og-db.db
+deno run -A og.js --file tmp.db --init --generate-fixture-data --num-fixture-pages 10 --serve
+deno run -A og.js --file tmp.db --serve
+deno run -A og.js --file tmp.db --fetch mozilla.org
+datasette -p 8080 tmp.db
 ```

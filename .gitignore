@@ -2,3 +2,4 @@
 node_modules
 stash
 .env
+tmp.db
