@@ -20,7 +20,9 @@ const args = parse(Deno.args, {
     serve: false,
     port: 8080,
     init: false,
+    migrate: false,
     fetch: false,
+    verbose: false,
     cors: true,
     "generate-fixture-data": false,
     "num-fixture-pages": 20,
@@ -30,16 +32,21 @@ const args = parse(Deno.args, {
 const {
   file,
   init,
+  migrate: exitAfterMigrate,
   fetch,
   cors,
   port,
   serve: server,
+  verbose,
   "generate-fixture-data": generate_fixture_data,
   "num-fixture-pages": num_fixture_pages,
 } = args;
 
-console.log(args);
-if (!server && !init && !generate_fixture_data && !fetch) {
+if (verbose) {
+  console.log("Running with args", args);
+}
+
+if (!server && !init && !generate_fixture_data && !fetch && !migrate) {
   console.log("no action specified. try with --server");
   Deno.exit();
 }
@@ -63,6 +70,11 @@ if (!db) {
 }
 
 migrate({ db });
+
+if (exitAfterMigrate) {
+  console.log("Migration complete, exiting.");
+  Deno.exit();
+}
 
 if (generate_fixture_data) {
   console.log("Seeding data");
