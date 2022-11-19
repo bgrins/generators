@@ -75,14 +75,15 @@ export function parseFromHTML(html, options) {
 }
 
 export async function fetchAndParse(url, options) {
-  url = fixupURL(url);
-  let resp = await fetch(url);
+  let url_obj = fixupURL(url);
+  if (!url_obj) {
+    throw new Error(`Invalid URL: ${url}`);
+  }
+  let resp = await fetch(url_obj);
   let text = await resp.text();
-  console.log(`Recieved ${text.length} characters from ${url}`);
+  console.log(`Recieved ${text.length} characters from ${url_obj}`);
   // Todo handle error vs just empty meta
   let r = parseFromHTML(text, options);
-
-  console.log(r);
 
   // meta.host = url.hostname;
   return {
@@ -92,22 +93,38 @@ export async function fetchAndParse(url, options) {
   };
 }
 
-export function isValidHttpUrl(string) {
+export function isFetchableURL(string) {
   let url;
   try {
     url = new URL(string);
   } catch (_) {
     return false;
   }
-  return url.protocol === "http:" || url.protocol === "https:";
+  let is_supported_protocol =
+    url.protocol === "http:" ||
+    url.protocol === "https:" ||
+    url.protocol === "data:";
+  return is_supported_protocol;
 }
 
 export function fixupURL(url) {
-  if (!isValidHttpUrl(url)) {
-    url = `https://${url}`;
-    if (!isValidHttpUrl(url)) {
-      return null;
-    }
+  if (!url) {
+    return null;
   }
-  return new URL(url);
+  url = url.toString().trim();
+  let is_fetchable = isFetchableURL(url);
+  if (is_fetchable) {
+    return new URL(url);
+  }
+
+  // There are edge cases with how URLs get resolved for strings like "1" or "1.1". This is good enough for now.
+  let ip4 = RegExp(
+    "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])"
+  );
+
+  let use_http = ip4.test(url) || !url.includes(".");
+
+  url = use_http ? `http://${url}` : `https://${url}`;
+
+  return isFetchableURL(url) ? new URL(url) : null;
 }

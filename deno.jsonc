@@ -8,6 +8,7 @@
     "migrate": "deno run -A og.js --file fixtures.db --migrate", // deno task fetch mozilla.org
     "fetch": "deno run -A og.js --file fixtures.db --fetch ", // deno task fetch mozilla.org
     "serve": "deno run -A og.js --file fixtures.db --serve",
-    "test": "deno run -A og.js --file fixtures.db --serve & deno test"
+    "test": "deno test og_test.js --no-check",
+    "test2": "deno run -A og.js --file fixtures.db --serve & deno test"
   }
 }

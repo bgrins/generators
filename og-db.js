@@ -395,6 +395,7 @@ export async function processIndividualRequestQueue({ db, request_id }) {
   try {
     response = await fetchAndParse(page, { og_response_fields });
   } catch (e) {
+    console.error(e);
     db.query(
       `UPDATE request_queue SET status = ?, detail = ? WHERE request_id = ?`,
       ["error", e.toString(), request_id]

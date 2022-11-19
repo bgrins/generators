@@ -82,9 +82,12 @@ if (generate_fixture_data) {
 }
 
 if (fetch) {
-  console.log(`fetching ${fetch}`);
-  let response = await addRequest({ db, url: fetch, wait: true });
-  console.log(response);
+  const urls_to_fetch = Array.isArray(fetch) ? fetch : [fetch];
+  for (let url of urls_to_fetch) {
+    console.log(`fetching ${url}`);
+    let response = await addRequest({ db, url, wait: true });
+    console.log(response);
+  }
   Deno.exit();
 }
 
